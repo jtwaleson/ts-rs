@@ -60,6 +60,7 @@ mod top_level_type_as;
 mod top_level_type_override;
 mod tuple;
 mod type_as;
+mod type_conflict;
 mod type_override;
 mod union;
 mod union_named_serde_skip;

@@ -1,4 +1,8 @@
 use ts_rs::TS;
+// NOTE: this file is not executed now, could not get the tests to work as the ts
+// output is triggered regardless of calling export_all.
+//
+// However, I've verified that it does work by running this branch of ts-rs in my project.
 
 mod different_types {
     use super::*;
