@@ -71,9 +71,9 @@ impl DerivedTS {
                     // Only provide source paths for user-defined types that are actually exported
                     // Check if this type has an output_path (can be exported)
                     if <Self as #crate_rename::TS>::output_path().is_some() {
-                        // For now, we'll return a generic source path for user-defined types
-                        // This could be enhanced in the future with more specific path detection
-                        Some("./src/lib.rs")
+                        // Use the file!() macro to get the actual source file path
+                        // This will be evaluated at the location where the type is defined
+                        Some(file!())
                     } else {
                         // For primitive types and non-exportable types, return None
                         None
