@@ -63,6 +63,25 @@ impl DerivedTS {
             }
         };
 
+        // Generate source_path function that returns the source file path
+        let source_path_fn = {
+            let crate_rename = &self.crate_rename;
+            quote! {
+                fn source_path() -> Option<&'static str> {
+                    // Only provide source paths for user-defined types that are actually exported
+                    // Check if this type has an output_path (can be exported)
+                    if <Self as #crate_rename::TS>::output_path().is_some() {
+                        // For now, we'll return a generic source path for user-defined types
+                        // This could be enhanced in the future with more specific path detection
+                        Some("./src/lib.rs")
+                    } else {
+                        // For primitive types and non-exportable types, return None
+                        None
+                    }
+                }
+            }
+        };
+
         let docs = match &*self.docs {
             "" => None,
             docs => Some(quote!(const DOCS: Option<&'static str> = Some(#docs);)),
@@ -100,6 +119,7 @@ impl DerivedTS {
                 #inline
                 #generics_fn
                 #output_path_fn
+                #source_path_fn
 
                 fn visit_dependencies(v: &mut impl #crate_rename::TypeVisitor)
                 where

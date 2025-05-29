@@ -330,6 +330,14 @@ fn merge(original_contents: String, new_contents: String) -> String {
 pub(crate) fn export_to_string<T: TS + ?Sized + 'static>() -> Result<String, ExportError> {
     let mut buffer = String::with_capacity(1024);
     buffer.push_str(NOTE);
+    
+    // Add source file reference if available
+    if let Some(source_path) = <T as crate::TS>::source_path() {
+        buffer.push_str(&format!("// Source: file://{}\n\n", source_path));
+    } else {
+        buffer.push('\n');
+    }
+    
     generate_imports::<<T as crate::TS>::WithoutGenerics>(&mut buffer, default_out_dir())?;
     generate_decl::<T>(&mut buffer);
     buffer.push('\n');

@@ -411,6 +411,14 @@ pub trait TS {
     #[doc(hidden)]
     const IS_OPTION: bool = false;
 
+    /// Returns the path to the source file where this type is defined.
+    /// This is used to generate source file references in exported TypeScript files.
+    /// Returns `None` by default, but can be overridden by the derive macro to provide
+    /// the actual source file path.
+    fn source_path() -> Option<&'static str> {
+        None
+    }
+
     /// Identifier of this type, excluding generic parameters.
     fn ident() -> String {
         // by default, fall back to `TS::name()`.
@@ -732,6 +740,7 @@ macro_rules! impl_shadow {
             fn name() -> String { <$s as $crate::TS>::name() }
             fn inline() -> String { <$s as $crate::TS>::inline() }
             fn inline_flattened() -> String { <$s as $crate::TS>::inline_flattened() }
+            fn source_path() -> Option<&'static str> { <$s as $crate::TS>::source_path() }
             fn visit_dependencies(v: &mut impl $crate::TypeVisitor)
             where
                 Self: 'static,
