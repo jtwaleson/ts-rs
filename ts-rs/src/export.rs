@@ -157,7 +157,25 @@ fn export_and_merge(
     };
 
     if entry.contains(&type_name) {
-        return Ok(());
+        // If the type already exists, check if it's identical
+        let mut file = std::fs::OpenOptions::new()
+            .read(true)
+            .open(&path)?;
+
+        let file_len = file.metadata()?.len();
+        let mut original_contents = String::with_capacity(file_len as usize);
+        file.read_to_string(&mut original_contents)?;
+
+        // Extract just the type declaration from both files
+        let original_type = extract_type_declaration(&original_contents, &type_name)?;
+        let new_type = extract_type_declaration(&generated_type, &type_name)?;
+
+        if original_type == new_type {
+            // Types are identical, no need to do anything
+            return Ok(());
+        }
+
+        return Err(ExportError::TypeNameConflict(type_name));
     }
 
     let mut file = std::fs::OpenOptions::new()
@@ -180,6 +198,22 @@ fn export_and_merge(
     entry.insert(type_name);
 
     Ok(())
+}
+
+/// Extracts the type declaration for a given type name from the file contents
+fn extract_type_declaration(contents: &str, type_name: &str) -> Result<String, ExportError> {
+    let (_, decls) = contents
+        .split_once("\n\n")
+        .ok_or_else(|| ExportError::Fmt(std::fmt::Error))?;
+
+    for decl in decls.split("\n\n") {
+        let decl = decl.trim_matches('\n');
+        if decl.contains(&format!("export type {type_name}")) {
+            return Ok(decl.to_string());
+        }
+    }
+
+    Err(ExportError::Fmt(std::fmt::Error))
 }
 
 const HEADER_ERROR_MESSAGE: &str = "The generated strings must have their NOTE and imports separated from their type declarations by a new line";

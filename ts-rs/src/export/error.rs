@@ -12,4 +12,6 @@ pub enum ExportError {
     ManifestDirNotSet,
     #[error("an error occurred while writing to a formatted buffer")]
     Fmt(#[from] std::fmt::Error),
+    #[error("type name conflict: type '{0}' is already exported to the same file")]
+    TypeNameConflict(String),
 }
